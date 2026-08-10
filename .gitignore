@@ -1,0 +1,5 @@
+build/
+cmake-build-*/
+*.db
+.DS_Store
+build-your-own-mysql-cpp-guide.pdf
