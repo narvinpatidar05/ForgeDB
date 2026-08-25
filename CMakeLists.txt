@@ -8,5 +8,9 @@ include_directories(include)
 
 add_executable(mydb
     src/main.cpp
+    src/row_codec.cpp
+    src/page.cpp
+    src/page_manager.cpp
+    src/buffer_pool.cpp
     src/storage.cpp
 )
