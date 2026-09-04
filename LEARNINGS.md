@@ -827,7 +827,62 @@ Expected:
 
 ## Phase 2: REPL (Read-Eval-Print Loop)
 
-**Status:** Not started  
-*(Append learnings here after Phase 2 is complete)*
+**Status:** Complete  
+**Branch:** `feat/repl`
+
+### Concept
+
+MySQL client jaisa interactive shell — `mydb>` prompt jahan commands type karke turant result mile. Meta-commands (`.exit`, `.help`) shell ke against chalte hain, SQL ke against nahi — yeh distinction Phase 3+ mein important rahega.
+
+### Architecture
+
+```
+User types at terminal
+    ↓
+run_repl()                    ← repl.cpp
+    ├── .exit / .help         → meta-commands (handled in REPL loop)
+    ├── .select / .stats      → call StorageEngine directly (demo wiring)
+    └── other input           → execute_statement() → echo (Phase 3: parser)
+            ↓
+    StorageEngine               ← storage layer unchanged
+```
+
+### Key Files
+
+| File | Role |
+|------|------|
+| `include/repl.h` | `run_repl(StorageEngine&)` declaration |
+| `src/repl.cpp` | Shell loop, meta-commands, echo stub |
+| `src/main.cpp` | Creates `StorageEngine`, starts REPL |
+
+### Meta Commands
+
+| Command | Action |
+|---------|--------|
+| `.exit` | Flush storage, exit shell |
+| `.help` | List available commands |
+| `.select` | `select_all()` + print rows (storage demo) |
+| `.stats` | Buffer pool hits/misses, page count |
+
+### Core Learnings
+
+1. **REPL = Read-Eval-Print Loop** — read input, evaluate, print result, repeat
+2. **Meta vs SQL** — dot-prefix commands (`.exit`) shell control hain; `INSERT`, `SELECT` SQL hain — alag code paths
+3. **Thin client layer** — REPL ko storage ka internal detail nahi pata; sirf `StorageEngine` API call karta hai
+4. **execute_statement() stub** — abhi echo; Phase 3 mein yahi parser ko call karega
+
+### Why Before SQL Parser?
+
+Parser se pehle shell chahiye taaki har phase ke baad manually test kar sako — guide ka golden rule: "har phase ke baad working binary".
+
+### Long-Term Help
+
+- Production DB clients (mysql CLI, psql) same REPL pattern use karte hain
+- Meta-commands vs SQL separation = clean architecture jab parser add hoga
+- `.select` / `.stats` = manual testing tools jab tak SQL nahi aata
+
+### What's Next
+
+Phase 3: SQL Parser — lexer + tokenizer, `INSERT INTO users VALUES (...)` ko AST mein todna.
 
 ---

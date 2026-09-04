@@ -13,4 +13,5 @@ add_executable(mydb
     src/page_manager.cpp
     src/buffer_pool.cpp
     src/storage.cpp
+    src/repl.cpp
 )
